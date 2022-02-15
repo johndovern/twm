@@ -96,9 +96,9 @@ echo "source-file ~/.config/tmux/twm.conf" >> ~/.config/tmux/tmux.conf
 # or if you use ~/.tmux.conf
 echo "source-file ~/.config/tmux/twm.conf" >> ~/.tmux.conf
 ```
-Depending on where you keep your tmux config file these commands should give you
-a tmux that acts more like a dynamic tiling window manager. Alternatively you can
-copy and paste the block below into you tmux config file and get the same result.
+Depending on where you keep your tmux config file these commands should make
+tmux act more like a dynamic tiling window manager. Alternatively you can copy
+and paste the block below into you tmux config file and get the same result.
 ```
 bind-key j run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left}' | grep -iqE '^1$' && tmux select-pane -Z -t {top-right}) || (tmux display-message -p '#{pane_at_bottom}' | grep -iqE '^1$' && tmux select-pane -LZ) || (tmux select-pane -DZ) ; (tmux select-layout main-vertical)"
 
@@ -124,8 +124,9 @@ bind-key f select-pane -Z -t {top-left} \; select-layout main-vertical
 ```
 As <prefix> f is a prebound key I have included a replacement bind for it,
 commented out, at the bottom. You can replace enter with v/s if you are more
-used to using those key combos. Consider adding the following to your
-tmux.conf to get a nice default layout.
+used to using those key combos.
+
+Consider adding the following to your tmux.conf to get a nice default layout.
 ```
 set-option -g main-pane-height 100%
 set-option -g main-pane-width 60%
