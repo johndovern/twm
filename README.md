@@ -11,40 +11,41 @@ manager (specifically dwm). Right now `tmux.conf` checks most of those boxes.
   - [X] Fullscreened (or zoomed)
 - [X] Move between windows (tags/workspaces)
 - [ ] Able to have multiple masters
+
 In my mind this is the basic functionality of a dynamic tiling window manager.
 The only functionality that is not present is the possibility to have two or
 more master panes. It may be possible to get this functionality, but I am not
 sure of the best way to incorporate this here. Anyways on to the key bindings!
 ## Keybinds
 ```
-<key>       <action>
-j           Move down pane stack
+    <key>           <action>
+    j               Move down pane stack
 
-k           Move up pane stack
+    k               Move up pane stack
 
-h           Move focus to prev (-) window
+    h               Move focus to prev (-) window
 
-l           Move focus to next (+) window
+    l               Move focus to next (+) window
 
-H           Move the focused pane to the
-            prev (-) window. Focus remains
-            on current window and does not
-            switch to the destination.
+    H               Move the focused pane to the
+                    prev (-) window. Focus remains
+                    on current window and does not
+                    switch to the destination.
 
-L           Move the focused pane to the
-            next (+) window. Focus remains
-            on current window and does not
-            switch to the destination.
+    L               Move the focused pane to the
+                    next (+) window. Focus remains
+                    on current window and does not
+                    switch to the destination.
 
-space       Swap focused window with master
-            if focused window is the master
-            swap with next slave (top right)
+    space           Swap focused window with master
+                    if focused window is the master
+                    swap with next slave (top right)
 
-enter/v/s   Spawn new pane as master
+    enter/v/s       Spawn new pane as master
 
-i           Zoom (fullscreen) focused pane
+    i               Zoom (fullscreen) focused pane
 
-f           Move focus to master pane
+    f               Move focus to master pane
 ```
 **All of the above binds must be prefixed, Ctrl+b by default, to work**
 
