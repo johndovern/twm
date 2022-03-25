@@ -7,7 +7,7 @@ manager (specifically dwm). Right now `tmux.conf` checks most of those boxes.
 - [X] Able to swap focused pane with master pane
 - [X] Scroll up and down through stack
 - [X] Multiple layouts
-  - [X] Tiled
+  - [X] Tiled (horizontal and vertical)
   - [X] Fullscreen (or zoomed)
 - [X] Move between windows (tags/workspaces)
 - [ ] Able to have multiple masters
@@ -46,6 +46,8 @@ sure of the best way to incorporate this here. Anyways on to the key bindings!
     i               Fullscreen (zoom) focused pane
 
     f               Focus master pane
+
+    q               Kill focused pane and focus master
 ```
 **All of the above binds must be prefixed, Ctrl+b by default, to work**
 
@@ -91,46 +93,75 @@ same command, commented out, as <prefix> F so you can retain that bind. Here
 similarly often in tmux.
 ## Installation
 ```bash
-curl -JL https://github.com/johndovern/twm/raw/master/twm.conf -o ~/.config/tmux/twm.conf
-echo "source-file ~/.config/tmux/twm.conf" >> ~/.config/tmux/tmux.conf
+# Using curl
+mkdir -p ~/.config/tmux/twm
+curl -JL https://github.com/johndovern/twm/raw/master/twm.conf -o ~/.config/tmux/twm/twm.conf
+curl -JL https://github.com/johndovern/twm/raw/master/twm-horizontal.conf -o ~/.config/tmux/twm/twm-horizontal.conf
+echo "source-file ~/.config/tmux/twm/twm.conf" >> ~/.config/tmux/tmux.conf
 # or if you use ~/.tmux.conf
-echo "source-file ~/.config/tmux/twm.conf" >> ~/.tmux.conf
+echo "source-file ~/.config/tmux/twm/twm.conf" >> ~/.tmux.conf
+# Using git
+git clone https://github.com/johndovern/twm.git ~/.config/tmux/twm
+echo "source-file ~/.config/tmux/twm/twm.conf" >> ~/.config/tmux/tmux.conf
+# or if you use ~/.tmux.conf
+echo "source-file ~/.config/tmux/twm/twm.conf" >> ~/.tmux.conf
 ```
 Depending on where you keep your tmux config file these commands should make
 tmux act more like a dynamic tiling window manager. Alternatively you can copy
-and paste the block below into you tmux config file and get the same result.
+and paste the block below into you tmux config file. This will only give you
+access to the vertical layout.
 ```
-bind-key j run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left}' | grep -iqE '^1$' && tmux select-pane -Z -t {top-right}) || (tmux display-message -p '#{pane_at_bottom}' | grep -iqE '^1$' && tmux select-pane -LZ) || (tmux select-pane -DZ) ; (tmux select-layout main-vertical)"
+# Set main pane size for vertical and horizontal layouts
+set-option -g main-pane-height 60%
+set-option -g main-pane-width 60%
 
-bind-key k run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left}' | grep -iqE '^1$' && tmux select-pane -Z -t {bottom-right}) || (tmux display-message -p '#{pane_at_top}' | grep -iqE '^1$' && tmux select-pane -Z -t {top-left}) || (tmux select-pane -UZ) ; (tmux select-layout main-vertical)"
+# move focus through pane stack
+bind-key j run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux select-pane -t {next})" \; select-layout main-vertical
+bind-key k run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux select-pane -t {previous})" \; select-layout main-vertical
 
+# move pane up or down in stack
+bind-key J run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left} #{pane_at_bottom}' | grep -iqE '^0 1$' && tmux rotate-window -D && tmux select-pane -t0) || (tmux swap-pane -D)" \; select-layout main-vertical
+bind-key K run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left} #{pane_at_bottom}' | grep -iqE '^1 1$' && tmux rotate-window -U && tmux select-pane -t {bottom-right}) || (tmux swap-pane -U)" \; select-layout main-vertical
+
+# move to next (+) or prev (-) window
+# using l and h respectively
+bind-key l next-window \; select-layout main-vertical
 bind-key h previous-window \; select-layout main-vertical
 
-bind-key l next-window \; select-layout main-vertical
-
+# send current pane to the next (+) or prev (-) window
+# using L and H respectively
+# remove the '-d' flag if you want to follow the pane
+bind-key L join-pane -fdbh -t:+ \; select-layout main-vertical
 bind-key H join-pane -fdbh -t:- \; select-layout main-vertical
 
-bind-key L join-pane -fdbh -t:+ \; select-layout main-vertical
+# swap current pane with master pane
+# if current pane is the master, the next slave is swapped
+bind-key space run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_index}' | grep -iqE '^0$' && tmux swap-pane -dZ -s1) || (tmux swap-pane -s0)" \; select-layout main-vertical
 
-bind-key space run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_index}' | grep -iqE '^0$' && tmux swap-pane -dZ -s {top-right}) || (tmux swap-pane -Z -s {top-left}) ; (tmux select-layout main-vertical)"
+# use <prefix> enter, v, and s to open new panes as master
+bind-key enter run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux split-window -bh -t0)" \; select-layout main-vertical
 
-bind-key enter run "(tmux display-message -p '#{window_zoomed_flag}' | grep -iqE '^1$' && tmux resize-pane -Z) ; (tmux display-message -p '#{pane_at_left}' | grep -iqE '^1$' && tmux split-window -bh) || (tmux select-pane -LZ && tmux split-window -bh); (tmux select-layout main-vertical)" \; select-layout main-vertical
-
+# <prefix> i to zoom the focused pane
 bind-key i resize-pane -Z
 
-bind-key f select-pane -Z -t {top-left} \; select-layout main-vertical
+# <prefix> f to focus the master pane
+bind-key f select-pane -t0 \; select-layout main-vertical
 
+# <prefix> f is rebound above, this is an alternative if you'd like to remap it
 # bind-key F command-prompt "find-window -Z -- '%%'"
+
+# simple binds for pane/window switching
+bind-key a last-pane \; select-layout main-vertical
+bind-key c new-window \; select-layout main-vertical
+bind-key t next-window \; select-layout main-vertical
+bind-key T previous-window \; select-layout main-vertical
+
+# Kill pane
+bind-key q killp \; select-pane -t0 \; select-layout main-vertical
 ```
 As <prefix> f is a prebound key I have included a replacement bind for it,
 commented out, at the bottom. You can replace enter with v/s if you are more
 used to using those key combos.
-
-Consider adding the following to your tmux.conf to get a nice default layout.
-```
-set-option -g main-pane-height 100%
-set-option -g main-pane-width 60%
-```
 ## Disclaimer
 twm does not look to incoporate checks for (n)vim when switching panes. If you
 know what you are doing and want to suggest changes to enable movement between
